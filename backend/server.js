@@ -12,7 +12,7 @@ const app = express();
 app.use(cors({
   origin: [
     'http://localhost:5173',
-    'https://student-ms-frontend.vercel.app'
+    'https://student-management-system-three-gules.vercel.app'
   ],
   credentials: true,
 }));
