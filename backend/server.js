@@ -9,15 +9,11 @@ dotenv.config();
 const app = express();
 
 // ─── CORS ─────────────────────────────────────────────────
-// Allow all origins (fixes deployment issues)
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
-
-// Handle preflight requests
-app.options('*', cors());
 
 // ─── MIDDLEWARE ───────────────────────────────────────────
 app.use(express.json());
@@ -38,6 +34,7 @@ app.get('/', (req, res) => {
 
 // ─── GLOBAL ERROR HANDLER ─────────────────────────────────
 app.use((err, req, res, next) => {
+  console.error(err.stack);
   const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
   res.status(statusCode).json({
     message: err.message,
