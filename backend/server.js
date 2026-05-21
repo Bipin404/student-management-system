@@ -8,14 +8,18 @@ dotenv.config();
 
 const app = express();
 
-// ─── MIDDLEWARE ───────────────────────────────────────────
+// ─── CORS ─────────────────────────────────────────────────
+// Allow all origins (fixes deployment issues)
 app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'https://student-management-system-three-gules.vercel.app'
-  ],
-  credentials: true,
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
+
+// Handle preflight requests
+app.options('*', cors());
+
+// ─── MIDDLEWARE ───────────────────────────────────────────
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
