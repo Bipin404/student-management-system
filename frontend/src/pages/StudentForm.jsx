@@ -3,8 +3,10 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { studentAPI } from '../services/api';
 import toast from 'react-hot-toast';
 
+const BACKEND_URL = 'https://student-ms-backend-48qr.onrender.com';
+
 const StudentForm = () => {
-  const { id } = useParams(); // If id exists → edit mode
+  const { id } = useParams();
   const navigate = useNavigate();
   const isEditMode = Boolean(id);
 
@@ -19,7 +21,6 @@ const StudentForm = () => {
   const [loading, setLoading] = useState(false);
   const [fetchingStudent, setFetchingStudent] = useState(isEditMode);
 
-  // If edit mode, load existing student data
   useEffect(() => {
     if (isEditMode) {
       fetchStudent();
@@ -37,7 +38,7 @@ const StudentForm = () => {
         course: student.course,
       });
       if (student.profilePicture) {
-        setPreview(`http://localhost:5000/uploads/${student.profilePicture}`);
+        setPreview(`${BACKEND_URL}/uploads/${student.profilePicture}`);
       }
     } catch (error) {
       toast.error('Failed to load student data');
@@ -54,7 +55,6 @@ const StudentForm = () => {
     const file = e.target.files[0];
     if (file) {
       setProfilePicture(file);
-      // Show image preview
       setPreview(URL.createObjectURL(file));
     }
   };
@@ -64,7 +64,6 @@ const StudentForm = () => {
     setLoading(true);
 
     try {
-      // Use FormData because we're sending both text and file
       const data = new FormData();
       data.append('name', formData.name);
       data.append('email', formData.email);
@@ -84,6 +83,7 @@ const StudentForm = () => {
 
       navigate('/students');
     } catch (error) {
+      console.error('Form submit error:', error);
       toast.error(error.response?.data?.message || 'Something went wrong');
     } finally {
       setLoading(false);
@@ -106,6 +106,7 @@ const StudentForm = () => {
 
       <div className="bg-white rounded-xl shadow p-8">
         <form onSubmit={handleSubmit} className="space-y-6">
+
           {/* Profile Picture Upload */}
           <div className="flex flex-col items-center gap-4">
             {preview ? (
@@ -128,6 +129,9 @@ const StudentForm = () => {
                 className="hidden"
               />
             </label>
+            <p className="text-xs text-gray-400">
+              Optional — Max 5MB (jpg, png, gif)
+            </p>
           </div>
 
           {/* Name */}
@@ -224,6 +228,7 @@ const StudentForm = () => {
               }
             </button>
           </div>
+
         </form>
       </div>
     </div>

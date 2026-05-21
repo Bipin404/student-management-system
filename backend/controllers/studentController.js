@@ -1,21 +1,13 @@
 const Student = require('../models/Student');
 
 // ─── GET ALL STUDENTS (with Search + Pagination) ──────────
-// GET /api/students
 const getStudents = async (req, res) => {
   try {
-    // Get query parameters from URL
-    // Example: /api/students?page=1&limit=5&search=John
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 5;
     const search = req.query.search || '';
-
-    // Calculate how many records to skip
-    // Page 1 → skip 0, Page 2 → skip 5, Page 3 → skip 10
     const skip = (page - 1) * limit;
 
-    // Build search filter
-    // Search in name OR course fields (case-insensitive)
     const searchFilter = search
       ? {
           $or: [
@@ -25,13 +17,11 @@ const getStudents = async (req, res) => {
         }
       : {};
 
-    // Get students with filter, skip, and limit
     const students = await Student.find(searchFilter)
       .skip(skip)
       .limit(limit)
-      .sort({ createdAt: -1 }); // Newest first
+      .sort({ createdAt: -1 });
 
-    // Count total matching students (for pagination)
     const total = await Student.countDocuments(searchFilter);
 
     res.json({
@@ -46,7 +36,6 @@ const getStudents = async (req, res) => {
 };
 
 // ─── GET SINGLE STUDENT ───────────────────────────────────
-// GET /api/students/:id
 const getStudent = async (req, res) => {
   try {
     const student = await Student.findById(req.params.id);
@@ -62,37 +51,37 @@ const getStudent = async (req, res) => {
 };
 
 // ─── CREATE STUDENT ───────────────────────────────────────
-// POST /api/students
 const createStudent = async (req, res) => {
   try {
     const { name, email, age, course } = req.body;
 
-    // Check if email already exists
+    if (!name || !email || !age || !course) {
+      return res.status(400).json({ message: 'Please provide all fields' });
+    }
+
     const emailExists = await Student.findOne({ email });
     if (emailExists) {
       return res.status(400).json({ message: 'Email already exists' });
     }
 
-    // Get profile picture path if uploaded
     const profilePicture = req.file ? req.file.filename : '';
 
-    // Create the student
     const student = await Student.create({
       name,
       email,
-      age,
+      age: Number(age),
       course,
       profilePicture,
     });
 
     res.status(201).json(student);
   } catch (error) {
+    console.error('Create student error:', error);
     res.status(500).json({ message: error.message });
   }
 };
 
 // ─── UPDATE STUDENT ───────────────────────────────────────
-// PUT /api/students/:id
 const updateStudent = async (req, res) => {
   try {
     const student = await Student.findById(req.params.id);
@@ -103,28 +92,24 @@ const updateStudent = async (req, res) => {
 
     const { name, email, age, course } = req.body;
 
-    // If new picture uploaded, use it. Otherwise keep existing.
     const profilePicture = req.file
       ? req.file.filename
       : student.profilePicture;
 
-    // Update the student
     const updatedStudent = await Student.findByIdAndUpdate(
       req.params.id,
-      { name, email, age, course, profilePicture },
+      { name, email, age: Number(age), course, profilePicture },
       { new: true, runValidators: true }
-      // new: true → returns the updated document
-      // runValidators → runs schema validations on update too
     );
 
     res.json(updatedStudent);
   } catch (error) {
+    console.error('Update student error:', error);
     res.status(500).json({ message: error.message });
   }
 };
 
 // ─── DELETE STUDENT ───────────────────────────────────────
-// DELETE /api/students/:id
 const deleteStudent = async (req, res) => {
   try {
     const student = await Student.findById(req.params.id);
@@ -142,26 +127,22 @@ const deleteStudent = async (req, res) => {
 };
 
 // ─── DASHBOARD ANALYTICS ──────────────────────────────────
-// GET /api/students/analytics
 const getAnalytics = async (req, res) => {
   try {
-    // Total number of students
     const totalStudents = await Student.countDocuments();
 
-    // Count students grouped by course
     const studentsByCourse = await Student.aggregate([
       {
         $group: {
-          _id: '$course',         // Group by course field
-          count: { $sum: 1 },     // Count each group
+          _id: '$course',
+          count: { $sum: 1 },
         },
       },
       {
-        $sort: { count: -1 },     // Sort by most students first
+        $sort: { count: -1 },
       },
     ]);
 
-    // Most recent 5 students
     const recentStudents = await Student.find()
       .sort({ createdAt: -1 })
       .limit(5);
