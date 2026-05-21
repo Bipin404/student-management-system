@@ -3,8 +3,8 @@
 A full-stack MERN application for managing student records.
 
 ##  Live Demo
-- Frontend: [Coming Soon]
-- Backend API: [Coming Soon]
+- Frontend: https://student-ms-frontend.vercel.app
+- Backend API: https://student-ms-backend.onrender.com
 
 ##  Features
 - JWT Authentication (Register/Login)
