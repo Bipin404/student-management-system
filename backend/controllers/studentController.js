@@ -64,7 +64,8 @@ const createStudent = async (req, res) => {
       return res.status(400).json({ message: 'Email already exists' });
     }
 
-    const profilePicture = req.file ? req.file.filename : '';
+    // Cloudinary returns full URL in req.file.path
+    const profilePicture = req.file ? req.file.path : '';
 
     const student = await Student.create({
       name,
@@ -92,8 +93,9 @@ const updateStudent = async (req, res) => {
 
     const { name, email, age, course } = req.body;
 
+    // Cloudinary returns full URL in req.file.path
     const profilePicture = req.file
-      ? req.file.filename
+      ? req.file.path
       : student.profilePicture;
 
     const updatedStudent = await Student.findByIdAndUpdate(

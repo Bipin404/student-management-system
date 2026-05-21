@@ -28,4 +28,5 @@ const upload = multer({
   fileFilter: fileFilter,
 });
 
+const upload = require('../config/cloudinary');
 module.exports = upload;

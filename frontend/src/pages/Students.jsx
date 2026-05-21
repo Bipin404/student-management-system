@@ -112,7 +112,7 @@ const Students = () => {
                       <div className="flex items-center gap-3">
                         {student.profilePicture ? (
                           <img
-                            src={`http://localhost:5000/uploads/${student.profilePicture}`}
+                            src={student.profilePicture}
                             alt={student.name}
                             className="w-10 h-10 rounded-full object-cover border"
                           />
